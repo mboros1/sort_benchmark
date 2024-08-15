@@ -1,9 +1,15 @@
+/* Type your code here, or load an example. */
+int square(int num) {
+    return num * num;
+}
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <time.h>
+#include <unistd.h>
 
 #define INSERTION_SORT_THRESHOLD 24
 #define NINTHER_THRESHOLD 128
@@ -330,43 +336,52 @@ void print_array(int *arr, int size) {
 }
 
 int main() {
-  const int array_size = 1000000;
-  const int iterations = 10;
-  int **arrays = malloc(iterations * sizeof(int *));
+  const int array_size = 100;
+  const int iterations = 10000;
+  const int runs = 10;
+  double run_time = 0.0;
+  for (int i = 0; i < runs; ++i) {
+    int **arrays = malloc(iterations * sizeof(int *));
 
-  srand((unsigned int)time(NULL));
+    srand((unsigned int)time(NULL));
 
-  for (int i = 0; i < iterations; ++i) {
-    arrays[i] = malloc(array_size * sizeof(int));
-    for (int j = 0; j < array_size; ++j) {
-      arrays[i][j] = (rand() % 100) + 1;
+    for (int i = 0; i < iterations; ++i) {
+        arrays[i] = malloc(array_size * sizeof(int));
+        for (int j = 0; j < array_size; ++j) {
+        arrays[i][j] = (rand() % 100) + 1;
+        }
     }
-  }
 
-  struct timeval start, end;
-  gettimeofday(&start, NULL);
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
 
-  for (int i = 0; i < iterations; ++i) {
-    pdqsort(arrays[i], arrays[i] + array_size);
-  }
-
-  gettimeofday(&end, NULL);
-
-  double elapsed =
-      (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
-
-  printf("pdqsort execution time: %.6f seconds for 10 iterations\n", elapsed);
-  for (int i = 0; i < iterations; ++i) {
-    if (!is_sorted(arrays[i], array_size)) {
-      printf("Array %d is not sorted!\n", i);
-    } else {
-      printf("Array %d is sorted.\n", i);
+    for (int i = 0; i < iterations; ++i) {
+        pdqsort(arrays[i], arrays[i] + array_size);
     }
+
+    gettimeofday(&end, NULL);
+
+    double elapsed =
+        (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
+
+    run_time += elapsed;
+    /*for (int i = 0; i < iterations; ++i) {*/
+    /*  if (!is_sorted(arrays[i], array_size)) {*/
+    /*    printf("Array %d is not sorted!\n", i);*/
+    /*  } else {*/
+    /*    printf("Array %d is sorted.\n", i);*/
+    /*  }*/
+    /*}*/
+    for (int i = 0; i < iterations; ++i) {
+        free(arrays[i]);
+    }
+    free(arrays);
   }
-  for (int i = 0; i < iterations; ++i) {
-    free(arrays[i]);
-  }
-  free(arrays);
+
+  printf("[array_size]=%d [iterations]=%d [runs]=%d Average run time: %f\n", 
+         array_size, iterations, runs,
+         run_time / runs);
+  
 
   return 0;
 }
